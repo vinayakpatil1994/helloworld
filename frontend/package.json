@@ -1,0 +1,30 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "react-scripts": "0.8.5"
+  },
+  "dependencies": {
+    "axios": "^0.15.3",
+    "bootstrap": "^4.1.3",
+    "material-ui": "^0.20.0",
+    "react": "^16.2.0",
+    "react-bootstrap-table": "^4.3.1",
+    "react-dom": "^16.2.0",
+    "react-dropzone": "^3.10.0",
+    "react-file-tree": "0.0.8",
+    "react-redux": "^5.1.1",
+    "react-router-dom": "^4.0.0",
+    "react-tap-event-plugin": "^3.0.2",
+    "redux": "^4.0.1",
+    "redux-thunk": "^2.3.0",
+    "superagent": "^3.4.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
