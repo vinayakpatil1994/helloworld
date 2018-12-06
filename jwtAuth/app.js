@@ -28,6 +28,7 @@ var connection = mysql.createConnection({
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
   res.setHeader("Access-Control-Allow-Headers", "Content-type,Authorization");
+  res.setHeader("Access-Control-Allow-Methods", "*");
   next();
 });
 
@@ -136,12 +137,57 @@ app.get("/users", jwtMW /* Using the express jwt MW here */, (req, res) => {
   });
 });
 
+app.post("/addTask", jwtMW, (req, res) => {
+  //var today = new Date();
+  debugger;
+  var task = {
+    taskId: req.body.taskId,
+    taskName: req.body.taskName,
+    status: req.body.status
+  };
+  connection.query("INSERT INTO Tasks SET ?", task, function(
+    error,
+    result,
+    fields
+  ) {
+    if (error) {
+      console.log("error ocurred", error);
+      res.send({
+        code: 400,
+        failed: "error ocurred"
+      });
+    } else {
+      console.log("The solution is: ", result);
+      res.send({
+        code: 200,
+        success: "task Added sucessfully"
+      });
+    }
+  });
+});
+
+app.get("/tasks", jwtMW /* Using the express jwt MW here */, (req, res) => {
+  connection.query("SELECT * FROM Tasks ", function(error, results, fields) {
+    if (error) {
+      console.log("error ocurred", error);
+      res.send({
+        code: 400,
+        failed: "error ocurred"
+      });
+    } else {
+      //console.log('The solution is: ', results);
+      res.status(200).send(results);
+    }
+  });
+});
+
 app.delete(
   "/delete/:id",
   jwtMW /* Using the express jwt MW here */,
   (req, res) => {
     var id = req.params.id;
-    connection.query("DELETE FROM users WHERE id = ?", [id], function(
+    console.log("inside delete method ........");
+    connection.query("DELETE FROM Tasks WHERE taskId = ?", [id], function(
       error,
       results,
       fields
@@ -154,13 +200,15 @@ app.delete(
         });
       } else {
         console.log("The solution is: ", results);
-        res.status(200).send(results);
+        res.send({
+          code: 200,
+          success: "task deleted sucessfully"
+        });
       }
     });
   }
 );
 
-// Error handling
 app.use(function(err, req, res, next) {
   if (err.name === "UnauthorizedError") {
     // Send the error rather than to show it on the console
