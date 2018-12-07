@@ -25,6 +25,7 @@ class OpenModal extends Component {
   };
 
   handleClick2(event) {
+    var tasks = [];
     debugger;
     var payload = {
       taskId: this.state.taskId,
@@ -37,6 +38,12 @@ class OpenModal extends Component {
       return;
     }
 
+    tasks = JSON.parse(sessionStorage.getItem("tasks"));
+    console.log("session storage ...........", tasks);
+    tasks.push(payload);
+    console.log("Session updated", tasks);
+    sessionStorage.setItem("tasks", JSON.stringify(tasks));
+    console.log(tasks);
     var token = sessionStorage.getItem("token");
     console.log(token);
     if (token !== undefined || token !== null) {
@@ -65,6 +72,7 @@ class OpenModal extends Component {
           }
         });
     }
+
     this.onCloseModal();
     console.log("model should close now ");
   }

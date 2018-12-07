@@ -50,6 +50,10 @@ class UsersInfo extends Component {
 
       this.delete();
       this.setState({ tasks: tasks });
+    } else {
+      this.setState({
+        index: ind
+      });
     }
   };
 
@@ -149,14 +153,20 @@ class UsersInfo extends Component {
           console.log("from state data man:::::::");
           this.setState({ tasks: this.state.tasks });
         })
-        .catch(err => {
+        .catch(err1 => {
           // console.log(items);
           debugger;
           //var error = err.response.data.inner.name;
-          console.log(err);
-          this.setState({ tasks: [] });
-          alert("Token Expired");
-          //console.log("from state data man:::::::", this.state.dataState);
+          //console.log(error);
+          // this.setState({ dataState: [] });
+          // alert("Token Expired");
+          // console.log("from state data man:::::::", this.state.dataState);
+          console.log(err1);
+          if (err1.response.status === 401) {
+            localStorage.clear();
+            alert("Token expired!");
+            location.href = "/";
+          }
         });
     }
   }
@@ -165,15 +175,22 @@ class UsersInfo extends Component {
     const val = this.state.dataState.length === 0 ? false : true;
     const val1 = this.state.tasks.length === 0 ? false : true;
     var scope = this;
+    var tasks = [];
     const selectRow = {
       mode: "radio",
       bgColor: "pink",
       clickToSelect: true,
       onSelect: (row, isSelect, rowIndex, e) => {
+        if (isSelect == true) {
+          this.setState({
+            index: row.taskId
+          });
+        } else {
+          this.setState({ index: null });
+          return;
+        }
+
         console.log("onselect row data as ......", row.taskId);
-        this.setState({
-          index: row.taskId
-        });
       }
     };
 
@@ -253,6 +270,10 @@ class UsersInfo extends Component {
                 <TableHeaderColumn dataField="status">status</TableHeaderColumn>
               </BootstrapTable>
               <br />
+              {sessionStorage.setItem(
+                "tasks",
+                JSON.stringify(this.state.tasks)
+              )}
               <OpenModal />
               <br />
               <div>
@@ -271,6 +292,7 @@ class UsersInfo extends Component {
                 >
                   Delete Selected Task
                 </button>
+                <br />
               </div>
             </div>
           </MuiThemeProvider>
