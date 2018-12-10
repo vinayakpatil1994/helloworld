@@ -21,7 +21,8 @@ class UsersInfo extends Component {
       selectedData: "",
       tasks: [],
       open: false,
-      index: null
+      index: null,
+      updateEnabled: false
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -29,6 +30,8 @@ class UsersInfo extends Component {
     this.handleOpen = this.handleOpen.bind(this);
     this.triggerDelete = this.triggerDelete.bind(this);
     this.delete = this.delete.bind(this);
+    this.onAfterSaveCell = this.onAfterSaveCell.bind(this);
+    this.update = this.update.bind(this);
 
     this.options = {
       defaultSortName: "taskId", // default sort column name
@@ -171,11 +174,75 @@ class UsersInfo extends Component {
     }
   }
 
+  onAfterSaveCell(row, cellName, cellValue) {
+    debugger;
+    //alert(`Save cell ${cellName} with value ${cellValue}`);
+
+    let rowStr = "";
+    for (const prop in row) {
+      rowStr += prop + ": " + row[prop] + "\n";
+    }
+    this.updateRow(row);
+    //alert("The whole row :\n" + rowStr);
+  }
+
+  updateRow(row) {
+    console.log("row data .....", row);
+    debugger;
+    var payload = {
+      taskName: row.taskName,
+      status: row.status
+    };
+
+    // tasks = JSON.parse(sessionStorage.getItem("tasks"));
+    // console.log("session storage ...........", tasks);
+    // tasks.push(payload);
+    // console.log("Session updated", tasks);
+    // sessionStorage.setItem("tasks", JSON.stringify(tasks));
+    // console.log(tasks);
+    var token = sessionStorage.getItem("token");
+    console.log(token);
+    var id = row.taskId;
+    if (token !== undefined || token !== null) {
+      axios({
+        url: "http://localhost:8080/updateTask/" + id,
+        method: "put",
+        data: payload,
+        headers: {
+          Authorization: "Bearer " + token
+        }
+      })
+        .then(function(res) {
+          console.log(res);
+          if (res.data.code == 200) {
+            console.log("task updated successfully");
+          }
+        })
+        .catch(err1 => {
+          // console.log(items);
+          debugger;
+          console.log(err1);
+          if (err1.response.status === 401) {
+            localStorage.clear();
+            alert("Token expired!");
+            location.href = "/";
+          }
+        });
+    }
+  }
+
+  update() {
+    this.setState(prevState => ({
+      updateEnabled: !prevState.updateEnabled
+    }));
+  }
+
   render() {
     const val = this.state.dataState.length === 0 ? false : true;
     const val1 = this.state.tasks.length === 0 ? false : true;
     var scope = this;
     var tasks = [];
+
     const selectRow = {
       mode: "radio",
       bgColor: "pink",
@@ -199,12 +266,11 @@ class UsersInfo extends Component {
       //return `<button class="primary" value="delete"/>`;
       console.log(row);
     }
-    var options = {
-      onRowClick: function(row) {
-        scope.setState({
-          selectedData: row.id + "  " + row.first_name + "  " + row.last_name
-        });
-      }
+
+    const cellEditProp = {
+      mode: "click",
+      blurToSave: true,
+      afterSaveCell: this.onAfterSaveCell
     };
 
     return (
@@ -224,7 +290,12 @@ class UsersInfo extends Component {
           <MuiThemeProvider>
             <div>
               <h4>All Registered Users</h4>
-              <BootstrapTable data={this.state.dataState} options={options}>
+              <BootstrapTable
+                data={this.state.dataState}
+                cellEdit={
+                  this.state.updateEnabled == true ? cellEditProp : Object
+                }
+              >
                 <TableHeaderColumn dataField="id" isKey width={"10%"}>
                   ID
                 </TableHeaderColumn>
@@ -256,24 +327,45 @@ class UsersInfo extends Component {
           <MuiThemeProvider>
             <div>
               <h4>All Tasks with details</h4>
-              <BootstrapTable
-                data={scope.state.tasks}
-                selectRow={selectRow}
-                options={this.options}
-              >
-                <TableHeaderColumn dataField="taskId" isKey width={"10%"}>
-                  ID
-                </TableHeaderColumn>
-                <TableHeaderColumn dataField="taskName">
-                  Task Name
-                </TableHeaderColumn>
-                <TableHeaderColumn dataField="status">status</TableHeaderColumn>
-              </BootstrapTable>
-              <br />
-              {sessionStorage.setItem(
-                "tasks",
-                JSON.stringify(this.state.tasks)
+              {this.state.updateEnabled == true ? (
+                <BootstrapTable
+                  data={scope.state.tasks}
+                  //selectRow={selectRow}
+                  options={this.options}
+                  cellEdit={
+                    this.state.updateEnabled == true ? cellEditProp : {}
+                  }
+                >
+                  <TableHeaderColumn dataField="taskId" isKey width={"10%"}>
+                    ID
+                  </TableHeaderColumn>
+                  <TableHeaderColumn dataField="taskName">
+                    Task Name
+                  </TableHeaderColumn>
+                  <TableHeaderColumn dataField="status">
+                    status
+                  </TableHeaderColumn>
+                </BootstrapTable>
+              ) : (
+                <BootstrapTable
+                  data={scope.state.tasks}
+                  selectRow={selectRow}
+                  options={this.options}
+                  //cellEdit={this.state.updateEnabled == true ? cellEditProp : {}}
+                >
+                  <TableHeaderColumn dataField="taskId" isKey width={"10%"}>
+                    ID
+                  </TableHeaderColumn>
+                  <TableHeaderColumn dataField="taskName">
+                    Task Name
+                  </TableHeaderColumn>
+                  <TableHeaderColumn dataField="status">
+                    status
+                  </TableHeaderColumn>
+                </BootstrapTable>
               )}
+
+              <br />
               <OpenModal />
               <br />
               <div>
@@ -291,6 +383,14 @@ class UsersInfo extends Component {
                   }}
                 >
                   Delete Selected Task
+                </button>
+                <br />
+                <br />
+                <button
+                  className="btn btn-primary del-wrap"
+                  onClick={this.update}
+                >
+                  Enable Update
                 </button>
                 <br />
               </div>
