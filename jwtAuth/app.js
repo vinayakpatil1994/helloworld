@@ -64,7 +64,7 @@ app.post("/api/login", (req, res) => {
       if (results.length > 0) {
         if (results[0].password == password) {
           let token = jwt.sign({ username: email }, "heapTrace", {
-            expiresIn: 1000
+            expiresIn: 300
           }); // Sigining the token
           res.json({
             code: 200,
@@ -208,6 +208,30 @@ app.delete(
     });
   }
 );
+
+app.put("/updateTask/:id", jwtMW, (req, res) => {
+  console.log("into the update row finction ...............");
+  var query = "UPDATE Tasks SET taskName = ? , status = ? WHERE taskId =?";
+  connection.query(
+    query,
+    [req.body.taskName, req.body.status, req.params.id],
+    function(error, result, fields) {
+      if (error) {
+        console.log("error ocurred", error);
+        res.send({
+          code: 400,
+          failed: "error ocurred"
+        });
+      } else {
+        console.log("The solution is: ", result);
+        res.send({
+          code: 200,
+          success: "task updated sucessfully"
+        });
+      }
+    }
+  );
+});
 
 app.use(function(err, req, res, next) {
   if (err.name === "UnauthorizedError") {
