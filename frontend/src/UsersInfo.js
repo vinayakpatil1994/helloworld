@@ -364,9 +364,8 @@ class UsersInfo extends Component {
                   </TableHeaderColumn>
                 </BootstrapTable>
               )}
-
               <br />
-              <OpenModal />
+              <OpenModal updateTask={this.handleClick1} /> {this.props.children}
               <br />
               <div>
                 <button

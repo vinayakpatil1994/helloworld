@@ -72,7 +72,8 @@ class OpenModal extends Component {
           }
         });
     }
-
+    debugger;
+    this.props.updateTask();
     this.onCloseModal();
     console.log("model should close now ");
   }
