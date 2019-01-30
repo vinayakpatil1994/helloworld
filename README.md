@@ -7,5 +7,5 @@ This project has mainly two parts
 2. Backend
   - Backend is in nodeJs 
   - Jwt authentication with mysql as a database
-  - More detail are present in the jwtAuth folder 
+  - More details are in the jwtAuth folder 
   
